@@ -26,6 +26,16 @@ async function run(){
             })
         })
 
+        app.get('/data/:id', async(req,res) =>{
+            const {id} = req.params;
+            const query = {_id: ObjectId(id)};
+            const result = await dataCollection.findOne(query)
+            res.send({
+                success: true,
+                data: result
+            })
+        })
+
         app.post('/data', async(req,res)=>{
             const insertedData = req.body;
             const result = await dataCollection.insertOne(insertedData);
@@ -42,16 +52,40 @@ async function run(){
             }
         })
 
-        app.patch('/data', async(req,res)=>{
+        app.patch('/data/update/:id', async(req,res)=>{
             const {id} = req.params;
+            console.log(id)
+            console.log(req.body)
             const query = {_id : ObjectId(id)}
             const result = await dataCollection.updateOne(query,{$set: req.body})
-        if(result.modifiedCount){
+        if(result.matchedCount){
             res.send({
                 success: true,
                 message: "Changes updated successfully."
             })
+        }else{
+            res.send({
+                success: false,
+                message: "Failed to update."
+            })
         }
+        })
+
+        app.delete('/data/delete/:id', async(req,res)=>{
+            const {id} = req.params;
+            const query = {_id: ObjectId(id)}
+            const result = await dataCollection.deleteOne(query)
+            if(result.deletedCount){
+                res.send({
+                    success: true,
+                    message: "Deleted the data successfully."
+                })
+            }else{
+                res.send({
+                    success: false, 
+                    message: "Failed to delete!"
+                })
+            }
         })
     }
     catch(err){
